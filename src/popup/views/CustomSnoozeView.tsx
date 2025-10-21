@@ -28,12 +28,33 @@ function CustomSnoozeView(): React.ReactElement {
 
   useEffect(() => {
     const getCurrentTab = async (): Promise<void> => {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      setActiveTab(tab);
-      setLoading(false);
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const tabIdParam = params.get('tabId');
+        if (tabIdParam) {
+          const id = Number(tabIdParam);
+          if (!Number.isNaN(id)) {
+            try {
+              const tabById = await chrome.tabs.get(id);
+              setActiveTab(tabById);
+              setLoading(false);
+              return;
+            } catch (e) {
+              if (chrome.runtime.lastError) {
+                /* acknowledged */
+              }
+            }
+          }
+        }
+
+        const [tab] = await chrome.tabs.query({
+          active: true,
+          lastFocusedWindow: true,
+        });
+        setActiveTab(tab || null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getCurrentTab();
@@ -91,7 +112,7 @@ function CustomSnoozeView(): React.ReactElement {
   }
 
   return (
-    <div className='card bg-base-100 w-80 shadow-xl'>
+    <div className='card bg-base-100 mx-auto w-full max-w-sm min-w-[20rem] shadow-xl'>
       <div className='card-body p-5'>
         <div className='mb-4 flex items-center'>
           <Link

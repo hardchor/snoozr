@@ -6,7 +6,14 @@ const manifest: ManifestV3Export = {
   version: '1.6.0',
   description:
     'Temporarily put tabs to sleep and have them reappear when you need them',
-  permissions: ['storage', 'tabs', 'alarms', 'notifications', 'contextMenus'],
+  permissions: [
+    'storage',
+    'tabs',
+    'alarms',
+    'notifications',
+    'contextMenus',
+    'windows',
+  ],
   action: {
     default_popup: 'popup.html',
     default_icon: {

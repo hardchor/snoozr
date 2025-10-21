@@ -70,11 +70,21 @@ function addTaskToQueue(task: () => Promise<void>): Promise<void> {
 
 // Function to create or update the context menu
 function setupContextMenu() {
-  chrome.contextMenus.create({
-    id: 'snoozr',
-    title: 'Snooze this tab',
-    contexts: ['page'],
-  });
+  chrome.contextMenus.create(
+    {
+      id: 'snoozr',
+      title: 'Snooze this tab',
+      contexts: ['page'],
+    },
+    () => {
+      const error = chrome.runtime.lastError?.message;
+      if (error && !error.includes('Cannot create item with duplicate id')) {
+        logger.error('Failed to create context menu', {
+          error,
+        });
+      }
+    }
+  );
 }
 
 // Initialize extension when installed or updated
@@ -90,11 +100,55 @@ chrome.runtime.onStartup.addListener(() => {
   setupContextMenu();
 });
 
+async function openSnoozrPopup(sourceTabId?: number): Promise<void> {
+  // Prefer opening the action popup (Chrome), fall back to a small window (Vivaldi/others)
+  const canOpenActionPopup = Boolean(
+    chrome.action && typeof chrome.action.openPopup === 'function'
+  );
+  if (canOpenActionPopup) {
+    try {
+      await chrome.action.openPopup();
+      return;
+    } catch (e) {
+      // Some Chromium-based browsers (e.g., Vivaldi) may not support this
+      if (chrome.runtime.lastError) {
+        /* acknowledged */
+      }
+    }
+  }
+
+  const url = chrome.runtime.getURL(
+    sourceTabId
+      ? `popup.html?tabId=${encodeURIComponent(String(sourceTabId))}`
+      : 'popup.html'
+  );
+  try {
+    await chrome.windows.create({
+      url,
+      type: 'popup',
+      width: 320,
+      height: 640,
+      focused: true,
+    });
+  } catch (e) {
+    // As a last resort, try a normal tab
+    try {
+      await chrome.tabs.create({ url });
+    } catch (innerErr) {
+      if (chrome.runtime.lastError) {
+        /* acknowledged */
+      }
+      logger.error('Failed to open Snoozr UI from context menu', {
+        error: innerErr,
+      });
+    }
+  }
+}
+
 // Handle context menu clicks
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === 'snoozr' && tab?.id) {
-    // Open the popup programmatically
-    chrome.action.openPopup();
+    await openSnoozrPopup(tab.id);
   }
 });
 

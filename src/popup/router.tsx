@@ -43,9 +43,9 @@ const routeTree = rootRoute.addChildren([
   recurringSnoozeRoute,
 ]);
 
-// Create a memory history instance for Chrome extension environment
+// Use the default popup route; query params are read directly from window.location
 const memoryHistory = createMemoryHistory({
-  initialEntries: ['/'], // Start at the main view
+  initialEntries: ['/'],
 });
 
 // Create the router using the route tree and memory history

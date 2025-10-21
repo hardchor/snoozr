@@ -147,7 +147,7 @@ function RecurringSnoozeView(): React.ReactElement {
   }
 
   return (
-    <div className='card bg-base-100 w-80 shadow-xl'>
+    <div className='card bg-base-100 mx-auto w-full max-w-sm min-w-[20rem] shadow-xl'>
       <div className='card-body p-5'>
         <div className='mb-4 flex items-center'>
           <Link
