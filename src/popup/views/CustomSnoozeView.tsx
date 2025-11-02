@@ -5,6 +5,7 @@ import { Pencil } from 'lucide-react';
 import EditTabMetaModal from '../../components/EditTabMetaModal';
 import OneTimeSnoozeFields from '../../components/OneTimeSnoozeFields';
 import { nextDayISOForDatetimeLocal } from '../../utils/datetime';
+import { getCurrentTab } from '../../utils/tabs';
 
 function CustomSnoozeView(): React.ReactElement {
   const [activeTab, setActiveTab] = useState<chrome.tabs.Tab | null>(null);
@@ -27,16 +28,16 @@ function CustomSnoozeView(): React.ReactElement {
   };
 
   useEffect(() => {
-    const getCurrentTab = async (): Promise<void> => {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      setActiveTab(tab);
-      setLoading(false);
+    const fetchTab = async (): Promise<void> => {
+      try {
+        const tab = await getCurrentTab();
+        setActiveTab(tab);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    getCurrentTab();
+    fetchTab();
   }, []);
 
   const handleSnooze = async (): Promise<void> => {
@@ -91,7 +92,7 @@ function CustomSnoozeView(): React.ReactElement {
   }
 
   return (
-    <div className='card bg-base-100 w-80 shadow-xl'>
+    <div className='card bg-base-100 mx-auto w-full max-w-sm min-w-[20rem] shadow-xl'>
       <div className='card-body p-5'>
         <div className='mb-4 flex items-center'>
           <Link

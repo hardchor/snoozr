@@ -23,6 +23,7 @@ import {
 import EditTabMetaModal from '../../components/EditTabMetaModal';
 import { SnoozeOption } from '../../types';
 import { buildPresetTitle, calculatePresetWakeTime } from '../../utils/presets';
+import { getCurrentTab } from '../../utils/tabs';
 import useSettings from '../../utils/useSettings';
 import useSnoozePresets from '../../utils/useSnoozePresets';
 import useTheme from '../../utils/useTheme';
@@ -47,16 +48,16 @@ function MainView(): React.ReactElement {
   };
 
   useEffect(() => {
-    const getCurrentTab = async (): Promise<void> => {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      setActiveTab(tab);
-      setLoading(false);
+    const fetchTab = async (): Promise<void> => {
+      try {
+        const tab = await getCurrentTab();
+        setActiveTab(tab);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    getCurrentTab();
+    fetchTab();
   }, []);
 
   const snoozeOptions: SnoozeOption[] = presets.map((preset) => {
@@ -145,7 +146,7 @@ function MainView(): React.ReactElement {
   }
 
   return (
-    <div className='card bg-base-100 w-80 shadow-xl'>
+    <div className='card bg-base-100 mx-auto w-full max-w-sm min-w-[20rem] shadow-xl'>
       <div className='card-body p-5'>
         <div className='mb-4 flex items-center justify-between'>
           <h2 className='card-title text-primary flex items-center'>

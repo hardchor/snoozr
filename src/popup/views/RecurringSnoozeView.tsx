@@ -7,6 +7,7 @@ import RecurrenceFields from '../../components/RecurrenceFields';
 import { RecurrencePattern, SnoozedTab } from '../../types';
 import { computeWeekdayIndices, getAllDayIndices } from '../../utils/datetime';
 import { calculateNextWakeTime } from '../../utils/recurrence';
+import { getCurrentTab } from '../../utils/tabs';
 import useSettings from '../../utils/useSettings';
 
 // Accessible Form Control component using function declaration with destructured props
@@ -42,15 +43,15 @@ function RecurringSnoozeView(): React.ReactElement {
   };
 
   useEffect(() => {
-    const getCurrentTab = async (): Promise<void> => {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      setActiveTab(tab);
-      setLoading(false);
+    const fetchTab = async (): Promise<void> => {
+      try {
+        const tab = await getCurrentTab();
+        setActiveTab(tab);
+      } finally {
+        setLoading(false);
+      }
     };
-    getCurrentTab();
+    fetchTab();
   }, []);
 
   // Set default time and days based on settings
@@ -147,7 +148,7 @@ function RecurringSnoozeView(): React.ReactElement {
   }
 
   return (
-    <div className='card bg-base-100 w-80 shadow-xl'>
+    <div className='card bg-base-100 mx-auto w-full max-w-sm min-w-[20rem] shadow-xl'>
       <div className='card-body p-5'>
         <div className='mb-4 flex items-center'>
           <Link
