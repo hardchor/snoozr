@@ -5,6 +5,7 @@ import { Pencil } from 'lucide-react';
 import EditTabMetaModal from '../../components/EditTabMetaModal';
 import OneTimeSnoozeFields from '../../components/OneTimeSnoozeFields';
 import { nextDayISOForDatetimeLocal } from '../../utils/datetime';
+import { getCurrentTab } from '../../utils/tabs';
 
 function CustomSnoozeView(): React.ReactElement {
   const [activeTab, setActiveTab] = useState<chrome.tabs.Tab | null>(null);
@@ -27,37 +28,16 @@ function CustomSnoozeView(): React.ReactElement {
   };
 
   useEffect(() => {
-    const getCurrentTab = async (): Promise<void> => {
+    const fetchTab = async (): Promise<void> => {
       try {
-        const params = new URLSearchParams(window.location.search);
-        const tabIdParam = params.get('tabId');
-        if (tabIdParam) {
-          const id = Number(tabIdParam);
-          if (!Number.isNaN(id)) {
-            try {
-              const tabById = await chrome.tabs.get(id);
-              setActiveTab(tabById);
-              setLoading(false);
-              return;
-            } catch (e) {
-              if (chrome.runtime.lastError) {
-                /* acknowledged */
-              }
-            }
-          }
-        }
-
-        const [tab] = await chrome.tabs.query({
-          active: true,
-          lastFocusedWindow: true,
-        });
-        setActiveTab(tab || null);
+        const tab = await getCurrentTab();
+        setActiveTab(tab);
       } finally {
         setLoading(false);
       }
     };
 
-    getCurrentTab();
+    fetchTab();
   }, []);
 
   const handleSnooze = async (): Promise<void> => {

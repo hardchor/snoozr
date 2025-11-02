@@ -23,6 +23,7 @@ import {
 import EditTabMetaModal from '../../components/EditTabMetaModal';
 import { SnoozeOption } from '../../types';
 import { buildPresetTitle, calculatePresetWakeTime } from '../../utils/presets';
+import { getCurrentTab } from '../../utils/tabs';
 import useSettings from '../../utils/useSettings';
 import useSnoozePresets from '../../utils/useSnoozePresets';
 import useTheme from '../../utils/useTheme';
@@ -47,39 +48,16 @@ function MainView(): React.ReactElement {
   };
 
   useEffect(() => {
-    const getCurrentTab = async (): Promise<void> => {
+    const fetchTab = async (): Promise<void> => {
       try {
-        const params = new URLSearchParams(window.location.search);
-        const tabIdParam = params.get('tabId');
-        if (tabIdParam) {
-          const id = Number(tabIdParam);
-          if (!Number.isNaN(id)) {
-            try {
-              const tabById = await chrome.tabs.get(id);
-              setActiveTab(tabById);
-              setLoading(false);
-              return;
-            } catch (e) {
-              // Fall through to querying the last focused window
-              if (chrome.runtime.lastError) {
-                /* acknowledged */
-              }
-            }
-          }
-        }
-
-        // Fallback: active tab in the last focused window
-        const [tab] = await chrome.tabs.query({
-          active: true,
-          lastFocusedWindow: true,
-        });
-        setActiveTab(tab || null);
+        const tab = await getCurrentTab();
+        setActiveTab(tab);
       } finally {
         setLoading(false);
       }
     };
 
-    getCurrentTab();
+    fetchTab();
   }, []);
 
   const snoozeOptions: SnoozeOption[] = presets.map((preset) => {
