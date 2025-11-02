@@ -211,7 +211,12 @@ export function buildPresetTitle(
     if (preset.rule === 'weekend') {
       const currentDay = nowDate.getDay();
       // Check if we're currently in the weekend
-      // Weekend is the continuous block from startOfWeekend to the day before startOfWeek (wrapping)
+      // Weekend is the continuous block from startOfWeekend to the day before startOfWeek.
+      // There are two cases to handle:
+      // (1) Weekend doesn't wrap around week boundary (e.g., Saturday-Sunday, week starts Monday):
+      //     startOfWeekend <= startOfWeek, so check if currentDay is in [startOfWeekend, startOfWeek)
+      // (2) Weekend wraps around week boundary (e.g., Friday-Sunday, week starts Monday):
+      //     startOfWeekend > startOfWeek, so check if currentDay >= startOfWeekend OR currentDay < startOfWeek
       const isCurrentlyInWeekend =
         settings.startOfWeekend <= settings.startOfWeek
           ? currentDay >= settings.startOfWeekend &&
