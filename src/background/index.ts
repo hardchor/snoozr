@@ -109,7 +109,7 @@ async function openSnoozrPopup(sourceTabId?: number): Promise<void> {
     try {
       await chrome.action.openPopup();
       return;
-    } catch (e) {
+    } catch {
       // Some Chromium-based browsers (e.g., Vivaldi) may not support this
       if (chrome.runtime.lastError) {
         /* acknowledged */
@@ -123,14 +123,16 @@ async function openSnoozrPopup(sourceTabId?: number): Promise<void> {
       : 'popup.html'
   );
   try {
+    // Create a chromeless popup window (no address bar, no toolbars)
     await chrome.windows.create({
       url,
       type: 'popup',
-      width: 320,
+      width: 360,
       height: 640,
       focused: true,
+      state: 'normal',
     });
-  } catch (e) {
+  } catch {
     // As a last resort, try a normal tab
     try {
       await chrome.tabs.create({ url });
