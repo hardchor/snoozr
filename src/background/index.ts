@@ -107,12 +107,23 @@ async function openSnoozrPopup(sourceTabId?: number): Promise<void> {
   );
   if (canOpenActionPopup) {
     try {
+      // Store the sourceTabId in storage so the popup can retrieve it
+      // (chrome.action.openPopup doesn't support URL parameters)
+      if (sourceTabId !== undefined) {
+        await chrome.storage.local.set({
+          contextMenuTabId: sourceTabId,
+        });
+      }
       await chrome.action.openPopup();
       return;
     } catch {
       // Some Chromium-based browsers (e.g., Vivaldi) may not support this
       if (chrome.runtime.lastError) {
         /* acknowledged */
+      }
+      // Clear the stored tabId if popup opening failed
+      if (sourceTabId !== undefined) {
+        await chrome.storage.local.remove('contextMenuTabId');
       }
     }
   }
