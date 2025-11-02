@@ -138,6 +138,56 @@ export function calculatePresetWakeTime(
   }
 }
 
+/**
+ * Checks if two Date objects represent the same calendar date (year, month, day).
+ * Time components (hours, minutes, seconds, milliseconds) are ignored.
+ *
+ * @param date1 - First date to compare
+ * @param date2 - Second date to compare
+ * @returns True if both dates represent the same calendar date, false otherwise
+ */
+function isSameDate(date1: Date, date2: Date): boolean {
+  return (
+    date1.getDate() === date2.getDate() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getFullYear() === date2.getFullYear()
+  );
+}
+
+/**
+ * Builds a human-readable title for a snooze preset by substituting placeholders
+ * with actual values from settings.
+ *
+ * When `nowMs` is provided, the function dynamically adjusts titles based on actual
+ * scheduling logic to ensure accuracy:
+ * - 'Tonight' becomes 'Tomorrow Night' if the preset would schedule for tomorrow
+ *   (e.g., when endOfDay has already passed)
+ * - 'This Weekend' becomes 'Next Weekend' if we're currently in the weekend
+ *   (since the preset will schedule for the next weekend occurrence)
+ *
+ * @param preset - The snooze preset to build a title for
+ * @param settings - User settings containing day names, times, etc.
+ * @param nowMs - Optional timestamp (milliseconds since epoch). When provided,
+ *                enables dynamic title adjustment based on actual wake time calculation.
+ *                When omitted, only performs placeholder substitution.
+ * @returns The formatted title string with placeholders replaced and dynamic
+ *          adjustments applied (if nowMs was provided)
+ *
+ * @example
+ * // Without nowMs - static placeholder substitution
+ * buildPresetTitle(preset, settings)
+ * // Returns: "Tonight (at 20:00)"
+ *
+ * @example
+ * // With nowMs - dynamic adjustment when endOfDay has passed
+ * buildPresetTitle(preset, settings, Date.now())
+ * // Returns: "Tomorrow Night (at 20:00)" if scheduling for tomorrow
+ *
+ * @example
+ * // With nowMs - dynamic adjustment for weekend
+ * buildPresetTitle(weekendPreset, settings, saturdayTimestamp)
+ * // Returns: "Next Weekend (Saturday, 09:08)" if currently in weekend
+ */
 export function buildPresetTitle(
   preset: SnoozePreset,
   settings: SnoozrSettings,
@@ -164,11 +214,7 @@ export function buildPresetTitle(
     if (preset.rule === 'tonight') {
       const tomorrow = new Date(nowMs);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      const isTomorrow =
-        wakeDate.getDate() === tomorrow.getDate() &&
-        wakeDate.getMonth() === tomorrow.getMonth() &&
-        wakeDate.getFullYear() === tomorrow.getFullYear();
-      if (isTomorrow) {
+      if (isSameDate(wakeDate, tomorrow)) {
         adjustedTemplate = adjustedTemplate.replace(
           'Tonight',
           'Tomorrow Night'
