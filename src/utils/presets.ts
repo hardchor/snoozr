@@ -70,33 +70,6 @@ export const DEFAULT_SNOOZE_PRESETS: SnoozePreset[] = [
   },
 ];
 
-export function buildPresetTitle(
-  preset: SnoozePreset,
-  settings: SnoozrSettings
-): string {
-  const dayNames = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ];
-  const replacements: Record<string, string | number> = {
-    endOfDay: settings.endOfDay,
-    startOfDay: settings.startOfDay,
-    startOfWeekendName: dayNames[settings.startOfWeekend],
-    startOfWeekName: dayNames[settings.startOfWeek],
-    hours: preset.relative?.hours ?? '',
-    days: preset.relative?.days ?? '',
-  };
-  return preset.titleTemplate.replace(/\{(\w+)\}/g, (_, key) => {
-    const v = replacements[key];
-    return v === undefined ? `{${key}}` : String(v);
-  });
-}
-
 export function calculatePresetWakeTime(
   preset: SnoozePreset,
   settings: SnoozrSettings,
@@ -115,7 +88,11 @@ export function calculatePresetWakeTime(
       const [h, m] = settings.endOfDay.split(':').map(Number);
       today.setHours(h, m, 0, 0);
       if (today.getTime() < nowMs) {
-        return nowMs + 60 * 60 * 1000;
+        // endOfDay has passed, schedule for tomorrow at endOfDay
+        const tomorrow = new Date(nowMs);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(h, m, 0, 0);
+        return tomorrow.getTime();
       }
       return today.getTime();
     }
@@ -131,11 +108,14 @@ export function calculatePresetWakeTime(
       const currentDay = today.getDay();
       let daysUntil = settings.startOfWeekend - currentDay;
       if (daysUntil < 0) daysUntil += 7;
-      if (daysUntil === 0) daysUntil = 7; // always go to next weekend
       const targetDate = new Date(nowMs);
       targetDate.setDate(today.getDate() + daysUntil);
       const [h, m] = settings.startOfDay.split(':').map(Number);
       targetDate.setHours(h, m, 0, 0);
+      // If the calculated time is still in the past, add another week
+      if (targetDate.getTime() < nowMs) {
+        targetDate.setDate(targetDate.getDate() + 7);
+      }
       return targetDate.getTime();
     }
     case 'next_week': {
@@ -147,11 +127,88 @@ export function calculatePresetWakeTime(
       targetDate.setDate(today.getDate() + daysUntil);
       const [h, m] = settings.startOfDay.split(':').map(Number);
       targetDate.setHours(h, m, 0, 0);
+      // If the calculated time is still in the past, add another week
+      if (targetDate.getTime() < nowMs) {
+        targetDate.setDate(targetDate.getDate() + 7);
+      }
       return targetDate.getTime();
     }
     default:
       return nowMs;
   }
+}
+
+export function buildPresetTitle(
+  preset: SnoozePreset,
+  settings: SnoozrSettings,
+  nowMs?: number
+): string {
+  const dayNames = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
+
+  // Calculate wake time if nowMs is provided and preset is rule-based
+  let adjustedTemplate = preset.titleTemplate;
+  if (nowMs !== undefined && preset.kind === 'rule') {
+    const wakeTime = calculatePresetWakeTime(preset, settings, nowMs);
+    const wakeDate = new Date(wakeTime);
+    const nowDate = new Date(nowMs);
+
+    // Check if "tonight" actually schedules for tomorrow
+    if (preset.rule === 'tonight') {
+      const tomorrow = new Date(nowMs);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const isTomorrow =
+        wakeDate.getDate() === tomorrow.getDate() &&
+        wakeDate.getMonth() === tomorrow.getMonth() &&
+        wakeDate.getFullYear() === tomorrow.getFullYear();
+      if (isTomorrow) {
+        adjustedTemplate = adjustedTemplate.replace(
+          'Tonight',
+          'Tomorrow Night'
+        );
+      }
+    }
+
+    // Check if "weekend" actually schedules for next weekend
+    if (preset.rule === 'weekend') {
+      const currentDay = nowDate.getDay();
+      // Check if we're currently in the weekend
+      // Weekend is the continuous block from startOfWeekend to the day before startOfWeek (wrapping)
+      const isCurrentlyInWeekend =
+        settings.startOfWeekend <= settings.startOfWeek
+          ? currentDay >= settings.startOfWeekend &&
+            currentDay < settings.startOfWeek
+          : currentDay >= settings.startOfWeekend ||
+            currentDay < settings.startOfWeek;
+      // If we're currently in the weekend, it will schedule for next weekend
+      if (isCurrentlyInWeekend) {
+        adjustedTemplate = adjustedTemplate.replace(
+          'This Weekend',
+          'Next Weekend'
+        );
+      }
+    }
+  }
+
+  const replacements: Record<string, string | number> = {
+    endOfDay: settings.endOfDay,
+    startOfDay: settings.startOfDay,
+    startOfWeekendName: dayNames[settings.startOfWeekend],
+    startOfWeekName: dayNames[settings.startOfWeek],
+    hours: preset.relative?.hours ?? '',
+    days: preset.relative?.days ?? '',
+  };
+  return adjustedTemplate.replace(/\{(\w+)\}/g, (_, key) => {
+    const v = replacements[key];
+    return v === undefined ? `{${key}}` : String(v);
+  });
 }
 
 function normalizePreset(

@@ -234,7 +234,7 @@ function SnoozePresetsCard({
                           )}
                           <div className='min-w-0 text-left'>
                             <div className='truncate text-left font-medium'>
-                              {buildPresetTitle(p, settings)}
+                              {buildPresetTitle(p, settings, Date.now())}
                             </div>
                             <div className='text-base-content/70 truncate text-left text-xs'>
                               {formatPresetSubtitle(p)}
