@@ -44,6 +44,62 @@ describe('presets utils', () => {
     expect(title).toBe('Later (in 3h)');
   });
 
+  it('buildPresetTitle shows "Tomorrow Night" when "Tonight" schedules for tomorrow', () => {
+    const now = new Date(2025, 6, 12, 21, 0, 0, 0).getTime(); // Saturday 21:00 local
+    const tonightPreset = DEFAULT_SNOOZE_PRESETS.find(
+      (p) => p.id === 'tonight'
+    )!;
+    const settings: SnoozrSettings = {
+      ...baseSettings,
+      endOfDay: '20:00', // Already passed
+    };
+    const title = buildPresetTitle(tonightPreset, settings, now);
+    expect(title).toBe('Tomorrow Night (at 20:00)');
+  });
+
+  it('buildPresetTitle shows "Next Weekend" when "This Weekend" schedules for next weekend', () => {
+    const now = new Date(2025, 6, 12, 10, 16, 0, 0).getTime(); // Saturday 10:16 local
+    const weekendPreset = DEFAULT_SNOOZE_PRESETS.find(
+      (p) => p.id === 'weekend'
+    )!;
+    const settings: SnoozrSettings = {
+      ...baseSettings,
+      startOfDay: '09:08',
+      startOfWeekend: 6, // Saturday
+    };
+    const title = buildPresetTitle(weekendPreset, settings, now);
+    expect(title).toBe('Next Weekend (Saturday, 09:08)');
+  });
+
+  it('buildPresetTitle shows "This Weekend" when scheduling for current weekend', () => {
+    const now = new Date(2025, 6, 10, 10, 0, 0, 0).getTime(); // Thursday 10:00 local
+    const weekendPreset = DEFAULT_SNOOZE_PRESETS.find(
+      (p) => p.id === 'weekend'
+    )!;
+    const settings: SnoozrSettings = {
+      ...baseSettings,
+      startOfDay: '09:08',
+      startOfWeekend: 6, // Saturday
+    };
+    const title = buildPresetTitle(weekendPreset, settings, now);
+    expect(title).toBe('This Weekend (Saturday, 09:08)');
+  });
+
+  it('buildPresetTitle shows "Next Weekend" when currently on Sunday (part of weekend)', () => {
+    const now = new Date(2025, 6, 13, 10, 0, 0, 0).getTime(); // Sunday 10:00 local
+    const weekendPreset = DEFAULT_SNOOZE_PRESETS.find(
+      (p) => p.id === 'weekend'
+    )!;
+    const settings: SnoozrSettings = {
+      ...baseSettings,
+      startOfDay: '09:08',
+      startOfWeekend: 6, // Saturday
+      startOfWeek: 1, // Monday
+    };
+    const title = buildPresetTitle(weekendPreset, settings, now);
+    expect(title).toBe('Next Weekend (Saturday, 09:08)');
+  });
+
   it('calculatePresetWakeTime handles relative hours and days', () => {
     const now = new Date('2025-01-01T00:00:00.000Z').getTime();
     const preset: SnoozePreset = {
@@ -57,33 +113,116 @@ describe('presets utils', () => {
     expect(ts - now).toBe(24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000);
   });
 
-  it('calculatePresetWakeTime for tonight returns endOfDay today if in future, else +1h', () => {
-    const today = new Date();
-    const h = today.getUTCHours();
-    const m = today.getUTCMinutes();
-    const now = Date.now();
+  it('calculatePresetWakeTime for tonight returns endOfDay today if in future, else tomorrow endOfDay', () => {
+    // Use a fixed date to avoid timezone issues - July 12, 2025 21:00 local time
+    const nowDate = new Date(2025, 6, 12, 21, 0, 0, 0); // July 12, 2025 21:00 local
+    const now = nowDate.getTime();
 
-    // Set endOfDay far in the future for certainty
-    const s1: SnoozrSettings = { ...baseSettings, endOfDay: '23:59' };
     const tonight: SnoozePreset = {
       id: 'tonight',
       titleTemplate: 'Tonight',
       kind: 'rule',
       rule: 'tonight',
     };
-    const t1 = calculatePresetWakeTime(tonight, s1, now);
-    expect(t1).toBeGreaterThanOrEqual(now);
 
-    // If endOfDay has already passed, fallback is now + 1h
-    const pastHour = Math.max(0, h - 2)
-      .toString()
-      .padStart(2, '0');
-    const s2: SnoozrSettings = {
-      ...baseSettings,
-      endOfDay: `${pastHour}:${m.toString().padStart(2, '0')}`,
-    };
+    // If endOfDay is in the future today, schedule for today
+    const s1: SnoozrSettings = { ...baseSettings, endOfDay: '22:00' };
+    const t1 = calculatePresetWakeTime(tonight, s1, now);
+    const expectedToday = new Date(2025, 6, 12, 22, 0, 0, 0).getTime();
+    expect(t1).toBe(expectedToday);
+
+    // If endOfDay has already passed, schedule for tomorrow at endOfDay
+    const s2: SnoozrSettings = { ...baseSettings, endOfDay: '20:00' };
     const t2 = calculatePresetWakeTime(tonight, s2, now);
-    expect(t2).toBeGreaterThanOrEqual(now + 60 * 60 * 1000);
+    const expectedTomorrow = new Date(2025, 6, 13, 20, 0, 0, 0).getTime();
+    expect(t2).toBe(expectedTomorrow);
+    expect(t2).toBeGreaterThan(now);
+  });
+
+  it('calculatePresetWakeTime correctly handles boundary cases for rule presets', () => {
+    // Test "tonight" when endOfDay has passed - should schedule for tomorrow at endOfDay
+    const saturdayEvening = new Date(2025, 6, 12, 21, 0, 0, 0).getTime(); // Saturday 21:00 local
+    const tonightPreset: SnoozePreset = {
+      id: 'tonight',
+      titleTemplate: 'Tonight',
+      kind: 'rule',
+      rule: 'tonight',
+    };
+    const tonightSettings: SnoozrSettings = {
+      ...baseSettings,
+      endOfDay: '20:00', // Already passed
+    };
+    const tonightWake = calculatePresetWakeTime(
+      tonightPreset,
+      tonightSettings,
+      saturdayEvening
+    );
+    const expectedTomorrowNight = new Date(2025, 6, 13, 20, 0, 0, 0).getTime();
+    expect(tonightWake).toBe(expectedTomorrowNight);
+    expect(tonightWake).toBeGreaterThan(saturdayEvening);
+
+    // Test "weekend" when already in weekend and time has passed - should schedule for next weekend
+    // Saturday July 12, 2025 at 10:16 local time (matching user's CEST scenario)
+    const saturdayMorning = new Date(2025, 6, 12, 10, 16, 0, 0).getTime();
+    const weekendPreset = DEFAULT_SNOOZE_PRESETS.find(
+      (p) => p.id === 'weekend'
+    );
+    expect(weekendPreset).toBeDefined();
+    const weekendSettings: SnoozrSettings = {
+      ...baseSettings,
+      startOfDay: '09:08',
+      startOfWeekend: 6, // Saturday
+    };
+    const weekendWake = calculatePresetWakeTime(
+      weekendPreset!,
+      weekendSettings,
+      saturdayMorning
+    );
+    // Should be next Saturday (July 19) at 09:08 local time
+    const expectedNextWeekend = new Date(2025, 6, 19, 9, 8, 0, 0).getTime();
+    expect(weekendWake).toBe(expectedNextWeekend);
+    expect(weekendWake).toBeGreaterThan(saturdayMorning);
+    expect(new Date(weekendWake).getDay()).toBe(6); // Saturday
+
+    // Test "next_week" when already past start of week time - should schedule for next week
+    const mondayAfternoon = new Date(2025, 6, 14, 14, 0, 0, 0).getTime(); // Monday 14:00 local
+    const nextWeekPreset: SnoozePreset = {
+      id: 'next_week',
+      titleTemplate: 'Next Week',
+      kind: 'rule',
+      rule: 'next_week',
+    };
+    const nextWeekSettings: SnoozrSettings = {
+      ...baseSettings,
+      startOfDay: '09:00', // Already passed
+      startOfWeek: 1, // Monday
+    };
+    const nextWeekWake = calculatePresetWakeTime(
+      nextWeekPreset,
+      nextWeekSettings,
+      mondayAfternoon
+    );
+    // Should be next Monday (July 21) at 09:00 local time
+    const expectedNextMonday = new Date(2025, 6, 21, 9, 0, 0, 0).getTime();
+    expect(nextWeekWake).toBe(expectedNextMonday);
+    expect(nextWeekWake).toBeGreaterThan(mondayAfternoon);
+    expect(new Date(nextWeekWake).getDay()).toBe(1); // Monday
+
+    // Test "tomorrow" - should always schedule for tomorrow at startOfDay
+    const tomorrowPreset: SnoozePreset = {
+      id: 'tomorrow',
+      titleTemplate: 'Tomorrow',
+      kind: 'rule',
+      rule: 'tomorrow',
+    };
+    const tomorrowWake = calculatePresetWakeTime(
+      tomorrowPreset,
+      baseSettings,
+      saturdayMorning
+    );
+    const expectedTomorrow = new Date(2025, 6, 13, 10, 0, 0, 0).getTime();
+    expect(tomorrowWake).toBe(expectedTomorrow);
+    expect(tomorrowWake).toBeGreaterThan(saturdayMorning);
   });
 
   it('getSnoozePresets returns defaults when storage empty', async () => {

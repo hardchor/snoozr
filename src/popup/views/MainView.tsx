@@ -61,7 +61,7 @@ function MainView(): React.ReactElement {
   }, []);
 
   const snoozeOptions: SnoozeOption[] = presets.map((preset) => {
-    const label = buildPresetTitle(preset, settings);
+    const label = buildPresetTitle(preset, settings, Date.now());
     const calculateTime = () => calculatePresetWakeTime(preset, settings);
     // Map icon name to lucide icon component
     const iconMap: Record<
