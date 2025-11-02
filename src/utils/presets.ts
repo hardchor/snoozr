@@ -1,3 +1,4 @@
+import { isSameDate } from './datetime';
 import { SnoozrSettings } from './settings';
 
 export type SnoozePresetKind = 'relative' | 'rule';
@@ -136,22 +137,6 @@ export function calculatePresetWakeTime(
     default:
       return nowMs;
   }
-}
-
-/**
- * Checks if two Date objects represent the same calendar date (year, month, day).
- * Time components (hours, minutes, seconds, milliseconds) are ignored.
- *
- * @param date1 - First date to compare
- * @param date2 - Second date to compare
- * @returns True if both dates represent the same calendar date, false otherwise
- */
-function isSameDate(date1: Date, date2: Date): boolean {
-  return (
-    date1.getDate() === date2.getDate() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getFullYear() === date2.getFullYear()
-  );
 }
 
 /**

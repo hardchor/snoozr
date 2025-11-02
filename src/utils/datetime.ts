@@ -1,18 +1,27 @@
+/**
+ * Checks if two Date objects represent the same calendar date (year, month, day).
+ * Time components (hours, minutes, seconds, milliseconds) are ignored.
+ *
+ * @param date1 - First date to compare
+ * @param date2 - Second date to compare
+ * @returns True if both dates represent the same calendar date, false otherwise
+ */
+export function isSameDate(date1: Date, date2: Date): boolean {
+  return (
+    date1.getDate() === date2.getDate() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getFullYear() === date2.getFullYear()
+  );
+}
+
 export const formatHumanFriendlyDate = (timestamp: number): string => {
   const wakeDate = new Date(timestamp);
   const now = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(now.getDate() + 1);
 
-  const isToday =
-    wakeDate.getDate() === now.getDate() &&
-    wakeDate.getMonth() === now.getMonth() &&
-    wakeDate.getFullYear() === now.getFullYear();
-
-  const isTomorrow =
-    wakeDate.getDate() === tomorrow.getDate() &&
-    wakeDate.getMonth() === tomorrow.getMonth() &&
-    wakeDate.getFullYear() === tomorrow.getFullYear();
+  const isToday = isSameDate(wakeDate, now);
+  const isTomorrow = isSameDate(wakeDate, tomorrow);
 
   const timeOptions: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
