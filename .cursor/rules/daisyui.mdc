@@ -1,5 +1,5 @@
 ---
-description: daisyUI 5
+description: Documentation for DaisyUI (the UI framework we use) with plenty of components and helpers. Prefer to use these over custom solutions.
 alwaysApply: true
 applyTo: '**'
 downloadedFrom: https://daisyui.com/llms.txt
