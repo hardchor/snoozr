@@ -102,10 +102,7 @@ export const formatTimeInputHM = (date: Date): string => {
   return `${hh}:${mi}`;
 };
 
-export const nextDayISOForDatetimeLocal = (
-  nowMs: number = Date.now()
-): string => {
+export const nextDayForDatetimeLocal = (nowMs: number = Date.now()): string => {
   const next = new Date(nowMs + 24 * 60 * 60 * 1000);
-  // Keep behavior consistent with previous code using toISOString().slice(0,16)
-  return next.toISOString().slice(0, 16);
+  return `${formatDateInputYMD(next)}T${formatTimeInputHM(next)}`;
 };

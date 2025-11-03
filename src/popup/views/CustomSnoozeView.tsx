@@ -4,14 +4,14 @@ import { Pencil } from 'lucide-react';
 
 import EditTabMetaModal from '../../components/EditTabMetaModal';
 import OneTimeSnoozeFields from '../../components/OneTimeSnoozeFields';
-import { nextDayISOForDatetimeLocal } from '../../utils/datetime';
+import { nextDayForDatetimeLocal } from '../../utils/datetime';
 import { getCurrentTab } from '../../utils/tabs';
 
 function CustomSnoozeView(): React.ReactElement {
   const [activeTab, setActiveTab] = useState<chrome.tabs.Tab | null>(null);
   const [loading, setLoading] = useState(true);
   const [customDate, setCustomDate] = useState<string>(
-    nextDayISOForDatetimeLocal()
+    nextDayForDatetimeLocal()
   );
   const dateTimeId = useId();
   const [isEditing, setIsEditing] = useState(false);
