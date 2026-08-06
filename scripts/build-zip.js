@@ -52,7 +52,6 @@ const extractVersionFromManifest = async () => {
 const main = async () => {
   try {
     // Build the extension
-    // eslint-disable-next-line no-console
     console.log('Building extension...');
     await execPromise('pnpm run build', { cwd: rootDir });
 
@@ -67,16 +66,13 @@ const main = async () => {
     }
 
     // Zip the dist folder
-    // eslint-disable-next-line no-console
     console.log(`Creating ${zipFileName} in ${outputDir}...`);
     await execPromise(
       `cd "${path.join(rootDir, 'dist')}" && zip -r "${zipFilePath}" ./*`
     );
 
-    // eslint-disable-next-line no-console
     console.log(`Successfully created ${zipFilePath}`);
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('Error building or zipping the extension:', error);
     process.exit(1);
   }

@@ -4,6 +4,7 @@ import { Pencil } from 'lucide-react';
 
 import EditTabMetaModal from '../../components/EditTabMetaModal';
 import OneTimeSnoozeFields from '../../components/OneTimeSnoozeFields';
+import { SnoozedTab } from '../../types';
 import { nextDayForDatetimeLocal } from '../../utils/datetime';
 import { getCurrentTab } from '../../utils/tabs';
 
@@ -59,7 +60,7 @@ function CustomSnoozeView(): React.ReactElement {
 
     // Save snoozed tab info to storage
     await chrome.storage.local.get({ snoozedTabs: [] }, async (data) => {
-      const { snoozedTabs } = data;
+      const snoozedTabs = data.snoozedTabs as SnoozedTab[];
       snoozedTabs.push(tabInfo);
       await chrome.storage.local.set({ snoozedTabs });
 

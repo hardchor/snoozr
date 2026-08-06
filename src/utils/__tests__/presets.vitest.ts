@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SnoozePreset } from '../presets';
 import type { SnoozrSettings } from '../settings';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   buildPresetTitle,
@@ -227,7 +227,7 @@ describe('presets utils', () => {
 
   it('getSnoozePresets returns defaults when storage empty', async () => {
     vi.mocked(chrome.storage.sync.get).mockImplementation(
-      (keys: unknown, cb: (res: Record<string, unknown>) => void) => {
+      (_keys: unknown, cb: (res: Record<string, unknown>) => void) => {
         cb({});
       }
     );
@@ -239,7 +239,7 @@ describe('presets utils', () => {
 
   it('getSnoozePresets normalizes legacy later_today and title placeholders', async () => {
     vi.mocked(chrome.storage.sync.get).mockImplementation(
-      (keys: unknown, cb: (res: Record<string, unknown>) => void) => {
+      (_keys: unknown, cb: (res: Record<string, unknown>) => void) => {
         cb({
           snoozePresets: [
             {
@@ -263,7 +263,7 @@ describe('presets utils', () => {
 
   it('setSnoozePresets persists the provided presets', async () => {
     vi.mocked(chrome.storage.sync.set).mockImplementation(
-      (data: Record<string, unknown>, callback: () => void) => {
+      (_data: Record<string, unknown>, callback: () => void) => {
         callback();
       }
     );

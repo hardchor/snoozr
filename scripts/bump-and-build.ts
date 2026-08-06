@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
 // scripts/bump-and-build.ts
 // Usage: pnpm tsx scripts/bump-and-build.ts <patch|minor|major|x.y.z>
 // This script bumps the version in src/manifest.ts, runs pnpm build:zip, and prints the next release step.

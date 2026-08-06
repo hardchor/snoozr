@@ -20,7 +20,10 @@ export const DEFAULT_SETTINGS: SnoozrSettings = {
 export async function getSnoozrSettings(): Promise<SnoozrSettings> {
   return new Promise((resolve) => {
     chrome.storage.sync.get('settings', (result) => {
-      resolve({ ...DEFAULT_SETTINGS, ...result.settings });
+      const { settings } = result as {
+        settings?: Partial<SnoozrSettings>;
+      };
+      resolve({ ...DEFAULT_SETTINGS, ...settings });
     });
   });
 }
@@ -30,9 +33,12 @@ export async function setSnoozrSettings(
 ): Promise<void> {
   return new Promise((resolve) => {
     chrome.storage.sync.get('settings', (result) => {
+      const { settings: storedSettings } = result as {
+        settings?: Partial<SnoozrSettings>;
+      };
       const newSettings = {
         ...DEFAULT_SETTINGS,
-        ...result.settings,
+        ...storedSettings,
         ...settings,
       };
       chrome.storage.sync.set({ settings: newSettings }, () => resolve());

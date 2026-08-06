@@ -117,9 +117,7 @@ function SortableRow({
           type='button'
           className='btn btn-ghost btn-sm mr-1 cursor-grab'
           aria-label='Drag to reorder'
-          // eslint-disable-next-line react/jsx-props-no-spreading
           {...attributes}
-          // eslint-disable-next-line react/jsx-props-no-spreading
           {...listeners}
         >
           <GripVertical className='h-4 w-4' strokeWidth={2} />

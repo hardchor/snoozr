@@ -1,5 +1,5 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SnoozrSettings } from '../../utils/settings';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SnoozedTab } from '../../types';
 import { getSnoozrSettings } from '../../utils/settings';
@@ -95,8 +95,6 @@ describe('Background Script', () => {
     mockStorageLocalGet.mockReset();
     mockStorageLocalSet.mockReset();
     mockNotificationsCreate.mockReset();
-    chrome.runtime.lastError = undefined;
-
     mockStorageLocalGet.mockResolvedValue({ snoozedTabs: [] });
     mockStorageLocalSet.mockResolvedValue(undefined);
   });
@@ -105,6 +103,7 @@ describe('Background Script', () => {
     const mockAlarm: chrome.alarms.Alarm = {
       name: 'snoozed-tab-123',
       scheduledTime: Date.now(),
+      persistAcrossSessions: true,
     };
     const mockSnoozedTab: SnoozedTab = {
       id: 123,
@@ -182,6 +181,7 @@ describe('Background Script', () => {
       const alarmForRecurring: chrome.alarms.Alarm = {
         name: 'snoozed-tab-456',
         scheduledTime: Date.now(),
+        persistAcrossSessions: true,
       };
       const settingsOpenBg2: SnoozrSettings = {
         startOfDay: '09:00',
@@ -235,8 +235,7 @@ describe('Background Script', () => {
 
       expect(mockNotificationsCreate).toHaveBeenCalled();
       const notifArg = mockNotificationsCreate.mock.calls.at(-1)?.[0] as
-        | chrome.notifications.NotificationOptions<true>
-        | undefined;
+        chrome.notifications.NotificationOptions | undefined;
       expect(notifArg).toBeDefined();
       expect(notifArg?.message).toContain(
         'Note: Finish report and email Alice'
@@ -262,8 +261,7 @@ describe('Background Script', () => {
       });
 
       const notifArg = mockNotificationsCreate.mock.calls.at(-1)?.[0] as
-        | chrome.notifications.NotificationOptions<true>
-        | undefined;
+        chrome.notifications.NotificationOptions | undefined;
       expect(notifArg).toBeDefined();
       expect(notifArg?.message).not.toMatch(/\bNote:/);
     });

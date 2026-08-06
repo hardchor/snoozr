@@ -313,9 +313,12 @@ function normalizeSnoozePresets(
 export async function getSnoozePresets(): Promise<SnoozePreset[]> {
   return new Promise((resolve) => {
     chrome.storage.sync.get(['snoozePresets', 'settings'], (result) => {
-      const stored = (result.snoozePresets ??
-        DEFAULT_SNOOZE_PRESETS) as SnoozePreset[];
-      const legacyLaterHours = Number(result.settings?.laterHours);
+      const { snoozePresets, settings } = result as {
+        snoozePresets?: SnoozePreset[];
+        settings?: { laterHours?: number };
+      };
+      const stored = snoozePresets ?? DEFAULT_SNOOZE_PRESETS;
+      const legacyLaterHours = Number(settings?.laterHours);
       resolve(
         normalizeSnoozePresets(
           stored,

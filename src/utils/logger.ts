@@ -24,7 +24,6 @@ let debugLogsEnabled = false;
       debugLogsEnabled = Boolean(result[DEBUG_LOGGING_STORAGE_KEY]);
     }
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.warn('Snoozr Logger: Could not load debug setting from storage', e);
     // Keep the default value if storage access fails.
   }
@@ -40,10 +39,8 @@ export async function setDebugLoggingPreference(
   debugLogsEnabled = enabled;
   try {
     await chrome.storage.local.set({ [DEBUG_LOGGING_STORAGE_KEY]: enabled });
-    // eslint-disable-next-line no-console
     console.info(`Snoozr Logger: Debug logging preference set to ${enabled}`);
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.warn('Snoozr Logger: Could not save debug setting to storage', e);
   }
 }
@@ -74,20 +71,16 @@ export function log(level: LogLevel, message: string, context?: unknown): void {
 
   switch (level) {
     case LogLevel.DEBUG:
-      // eslint-disable-next-line no-console
       console.debug(formatLog(entry));
       break;
     case LogLevel.WARN:
-      // eslint-disable-next-line no-console
       console.warn(formatLog(entry));
       break;
     case LogLevel.ERROR:
-      // eslint-disable-next-line no-console
       console.error(formatLog(entry));
       break;
     default:
       // This case should ideally not be reached if LogLevel enum is used correctly.
-      // eslint-disable-next-line no-console
       console.log(`[UNKNOWN_LEVEL] ${formatLog(entry)}`);
   }
 }

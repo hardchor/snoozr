@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { RecurrencePattern } from '../types';
 import { computeWeekdayIndices } from './datetime';
 import { getSnoozrSettings, SnoozrSettings } from './settings';

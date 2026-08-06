@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useState } from 'react';
-import { AlertCircle, CheckCircle, Github, Lightbulb } from 'lucide-react';
+import { AlertCircle, CheckCircle, Code2, Lightbulb } from 'lucide-react';
 
 import OneTimeSnoozeFields from '../components/OneTimeSnoozeFields';
 import RecurrenceFields from '../components/RecurrenceFields';
@@ -57,8 +57,9 @@ function Options(): React.ReactElement {
   const loadSnoozedTabs = async (): Promise<void> => {
     try {
       setLoading(true);
-      const { snoozedTabs = [] } =
-        await chrome.storage.local.get('snoozedTabs');
+      const { snoozedTabs = [] } = (await chrome.storage.local.get(
+        'snoozedTabs'
+      )) as { snoozedTabs?: SnoozedTab[] };
       // Sort tabs by wake time
       const sortedTabs = [...snoozedTabs].sort(
         (a, b) => a.wakeTime - b.wakeTime
@@ -668,7 +669,7 @@ function Options(): React.ReactElement {
             rel='noopener noreferrer'
             className='link link-primary flex items-center gap-2'
           >
-            <Github className='h-4 w-4' strokeWidth={2} />
+            <Code2 className='h-4 w-4' strokeWidth={2} />
             GitHub Repository
           </a>
           <div className='flex gap-4'>

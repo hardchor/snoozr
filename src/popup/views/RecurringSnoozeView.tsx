@@ -122,7 +122,7 @@ function RecurringSnoozeView(): React.ReactElement {
 
     // Save snoozed tab info to storage
     await chrome.storage.local.get({ snoozedTabs: [] }, async (data) => {
-      const { snoozedTabs } = data;
+      const snoozedTabs = data.snoozedTabs as SnoozedTab[];
       snoozedTabs.push(tabInfo);
       await chrome.storage.local.set({ snoozedTabs });
 

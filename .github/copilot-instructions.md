@@ -36,8 +36,8 @@ When working on specific types of tasks, refer to these detailed guides:
 
 ### Prerequisites
 
-- Node.js (version 16 or higher)
-- pnpm package manager
+- Node.js (version 22.13 or higher)
+- pnpm package manager (version 11.20 or higher)
 - Chrome browser for testing
 
 ### Getting Started

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SnoozrSettings } from '../settings';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   DEFAULT_SETTINGS,
@@ -7,12 +7,14 @@ import {
   setSnoozrSettings,
 } from '../settings';
 
-// @ts-expect-error - partial mock
+const mockStorageSyncGet = vi.fn();
+const mockStorageSyncSet = vi.fn();
+
 global.chrome = {
   storage: {
     sync: {
-      get: vi.fn(),
-      set: vi.fn(),
+      get: mockStorageSyncGet,
+      set: mockStorageSyncSet,
     },
   },
   runtime: {
@@ -22,16 +24,15 @@ global.chrome = {
 
 describe('Snoozr Settings', () => {
   beforeEach(() => {
-    vi.mocked(chrome.storage.sync.get).mockReset();
-    vi.mocked(chrome.storage.sync.set).mockReset();
-    chrome.runtime.lastError = undefined;
+    mockStorageSyncGet.mockReset();
+    mockStorageSyncSet.mockReset();
   });
 
   describe('getSnoozrSettings', () => {
     it('returns defaults when empty', async () => {
-      vi.mocked(chrome.storage.sync.get).mockImplementation(
+      mockStorageSyncGet.mockImplementation(
         (
-          keys: string | string[],
+          _keys: string | string[],
           callback: (result: Record<string, unknown>) => void
         ) => {
           callback({});
@@ -48,9 +49,9 @@ describe('Snoozr Settings', () => {
         openInBg: true,
         startOfDay: '08:00',
       };
-      vi.mocked(chrome.storage.sync.get).mockImplementation(
+      mockStorageSyncGet.mockImplementation(
         (
-          keys: string | string[],
+          _keys: string | string[],
           callback: (result: Record<string, unknown>) => void
         ) => {
           callback({ settings: stored });
@@ -68,16 +69,16 @@ describe('Snoozr Settings', () => {
         openInBg: true,
         endOfDay: '20:00',
       } as SnoozrSettings;
-      vi.mocked(chrome.storage.sync.get).mockImplementation(
+      mockStorageSyncGet.mockImplementation(
         (
-          keys: string | string[],
+          _keys: string | string[],
           callback: (result: Record<string, unknown>) => void
         ) => {
           callback({ settings: {} });
         }
       );
-      vi.mocked(chrome.storage.sync.set).mockImplementation(
-        (data: Record<string, unknown>, callback: () => void) => {
+      mockStorageSyncSet.mockImplementation(
+        (_data: Record<string, unknown>, callback: () => void) => {
           callback();
         }
       );

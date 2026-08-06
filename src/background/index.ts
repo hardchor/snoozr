@@ -4,9 +4,8 @@ import { calculateNextWakeTime } from '../utils/recurrence';
 import { getSnoozrSettings } from '../utils/settings';
 
 // For easier debugging from the service worker console:
-// eslint-disable-next-line no-restricted-globals
 if (typeof self !== 'undefined') {
-  // eslint-disable-next-line no-restricted-globals, @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (self as any).setSnoozrDebugLogging = setDebugLoggingPreference;
 }
 

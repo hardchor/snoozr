@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 import EditTabMetaModal from '../../components/EditTabMetaModal';
-import { SnoozeOption } from '../../types';
+import { SnoozedTab, SnoozeOption } from '../../types';
 import { buildPresetTitle, calculatePresetWakeTime } from '../../utils/presets';
 import { getCurrentTab } from '../../utils/tabs';
 import useSettings from '../../utils/useSettings';
@@ -120,7 +120,7 @@ function MainView(): React.ReactElement {
 
     // Save snoozed tab info to storage
     await chrome.storage.local.get({ snoozedTabs: [] }, async (data) => {
-      const { snoozedTabs } = data;
+      const snoozedTabs = data.snoozedTabs as SnoozedTab[];
       snoozedTabs.push(tabInfo);
       await chrome.storage.local.set({ snoozedTabs });
 

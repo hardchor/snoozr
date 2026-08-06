@@ -1,6 +1,6 @@
-import { ManifestV3Export } from '@crxjs/vite-plugin';
+import { defineManifest } from '@crxjs/vite-plugin';
 
-const manifest: ManifestV3Export = {
+const manifest = defineManifest({
   manifest_version: 3,
   name: 'Snoozr',
   version: '1.7.1',
@@ -34,6 +34,6 @@ const manifest: ManifestV3Export = {
     '128': 'icons/icon128.png',
   },
   options_page: 'options.html',
-};
+});
 
 export default manifest;

@@ -36,8 +36,8 @@ When working on specific types of tasks, refer to these detailed guides:
 
 ### Prerequisites
 
-- Node.js (version 16 or higher)
-- pnpm package manager
+- Node.js (version 22.13 or higher)
+- pnpm package manager (version 11.20 or higher)
 - Chrome browser for testing
 
 ### Getting Started
@@ -81,7 +81,7 @@ When working on specific types of tasks, refer to these detailed guides:
 
 #### Testing approach and rules
 
-- **Runner**: Vitest 3 with globals enabled. Config lives in `vite.config.ts` under the `test` key. Types include `vitest/globals` in `tsconfig.json`.
+- **Runner**: Vitest 4 with globals enabled. Config lives in `vite.config.ts` under the `test` key. Types include `vitest/globals` in `tsconfig.json`.
 - **Test file naming**: Use `.vitest.ts`/`.vitest.tsx`. Valid globs:
   - `src/**/*.vitest.{ts,tsx}`
   - `src/**/__tests__/**/*.vitest.{ts,tsx}`

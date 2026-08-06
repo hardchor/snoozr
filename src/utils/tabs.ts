@@ -6,7 +6,6 @@
  *
  * @returns The active tab, or null if no tab could be found
  */
-// eslint-disable-next-line import/prefer-default-export
 export async function getCurrentTab(): Promise<chrome.tabs.Tab | null> {
   try {
     // First, check Chrome storage for contextMenuTabId

@@ -46,10 +46,13 @@ Note: exported JSON contains tab URLs and titles. Treat it as sensitive data.
 
 ## Development
 
+Requires Node.js 22.13 or newer and pnpm 11.20 or newer.
+
 1. 📥 Clone the repository
 2. 🔧 Install dependencies with `pnpm install`
 3. 🚀 Start development server with `pnpm dev`
 4. 🏗️ Build the extension for production with `pnpm build`
+5. ✅ Run the full local verification suite with `pnpm check`
 
 ## Releasing to Chrome Web Store
 

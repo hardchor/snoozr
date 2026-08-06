@@ -17,7 +17,9 @@ const useTheme = (): {
   useEffect(() => {
     const loadTheme = async (): Promise<void> => {
       try {
-        const { theme: savedTheme } = await chrome.storage.local.get('theme');
+        const { theme: savedTheme } = (await chrome.storage.local.get(
+          'theme'
+        )) as { theme?: Theme };
 
         // If no saved theme, check system preference
         if (!savedTheme) {
@@ -45,7 +47,9 @@ const useTheme = (): {
     const handleChange = async (e: MediaQueryListEvent): Promise<void> => {
       try {
         // Check if user has explicitly set a preference
-        const { theme: savedTheme } = await chrome.storage.local.get('theme');
+        const { theme: savedTheme } = (await chrome.storage.local.get(
+          'theme'
+        )) as { theme?: Theme };
         // Only update if user hasn't explicitly set a preference
         if (!savedTheme) {
           const newTheme = e.matches ? 'dark' : 'silk';
